@@ -1,3 +1,35 @@
+var root = '../modules/';
+var repository = '//fenixapps.fao.org/repository/js/';
+
+require.config({
+
+    baseUrl: 'js/libs',
+
+    paths: {
+
+        jquery : repository + 'jquery/1.10.2/jquery-1.10.2.min',
+        bootstrap: repository + 'bootstrap/3.2/js/bootstrap.min',
+        amplify: repository + 'amplify/1.1.2/amplify.min',
+
+        FAOSTAT_DOWNLOAD_SELECTOR: root + 'faostat-download-selector/faostat-download-selector',
+        faostat_download_selector: root + 'faostat-download-selector'
+
+    },
+
+    shim: {
+
+        'bootstrap': {
+            deps :['jquery']
+        },
+
+        'faostat_bulk_downloads': {
+            deps :['jquery']
+        }
+
+    }
+
+});
+
 define(['jquery',
         'handlebars',
         'text!faostat_download_selectors_manager/html/templates.html',
