@@ -16,6 +16,7 @@ define(['jquery',
             prefix: 'fenix_',
             datasource: 'faostatdb',
             placeholder_id: 'placeholder',
+            url_codelists: 'http://faostat3.fao.org/wds/',
             url_listboxes: 'http://faostat3.fao.org/wds/rest/procedures/listboxes'
         };
 
@@ -86,8 +87,8 @@ define(['jquery',
 
     MGR.prototype.create_single_selector = function(tab_box_definition, selector_id) {
 
-        console.log(selector_id);
-        console.log(tab_box_definition);
+        /* This... */
+        var _this = this;
 
         /* Add template to the main page. */
         var source = $(templates).filter('#single_selector').html();
@@ -99,10 +100,42 @@ define(['jquery',
         var html = template(dynamic_data);
         $('#' + this.CONFIG.prefix + 'selectors_grid').append(html);
 
-        //require(['FAOSTAT_DOWNLOAD_SELECTOR'], function(TEST) {
-        //    var t = new TEST();
-        //    t.init({});
-        //});
+        /* Create JSON configuration for the selector. */
+        var tab_json_definitions = [];
+        for (var i = 0 ; i < tab_box_definition.length ; i++)
+            tab_json_definitions.push(this.create_tab_json(tab_box_definition[i]));
+
+        console.log(tab_json_definitions);
+        console.log(_this.CONFIG.prefix + selector_id);
+
+        /* Load selector module. */
+        require(['FAOSTAT_DOWNLOAD_SELECTOR'], function(SELECTOR) {
+            var selector = new SELECTOR();
+            selector.init({
+                lang: _this.CONFIG.lang,
+                placeholder_id: _this.CONFIG.prefix + selector_id,
+                suffix: '_' + selector_id,
+                tabs: tab_json_definitions
+            });
+        });
+    };
+
+    MGR.prototype.create_tab_json =  function(tab_definition) {
+        var obj = {};
+        obj.label = tab_definition[1];
+        obj.rest = this.create_listbox_url(tab_definition);
+        return obj;
+    };
+
+    MGR.prototype.create_listbox_url = function(tab_definition) {
+        var s = this.CONFIG.url_codelists;
+        s += 'rest/procedures/usp_GetListBox/';
+        s += this.CONFIG.datasource + '/';
+        s += this.CONFIG.domain + '/';
+        s += tab_definition[0] + '/';
+        s += tab_definition[2] + '/';
+        s += this.CONFIG.lang;
+        return s;
     };
 
     return MGR;
