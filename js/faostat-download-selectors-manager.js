@@ -2,9 +2,10 @@ define(['jquery',
         'handlebars',
         'text!faostat_download_selectors_manager/html/templates.html',
         'i18n!faostat_download_selectors_manager/nls/translate',
+        'FAOSTAT_DOWNLOAD_SELECTOR',
         'bootstrap',
         'sweetAlert',
-        'amplify'], function ($, Handlebars, templates, translate) {
+        'amplify'], function ($, Handlebars, templates, translate, SELECTOR) {
 
     'use strict';
 
@@ -13,6 +14,7 @@ define(['jquery',
         this.CONFIG = {
             lang: 'E',
             domain: 'GT',
+            selectors: [],
             prefix: 'fenix_',
             datasource: 'faostatdb',
             placeholder_id: 'placeholder',
@@ -56,20 +58,8 @@ define(['jquery',
                 if (typeof json == 'string')
                     json = $.parseJSON(response);
 
-                /* Initiate variables. */
-                var current = '1';
-                var tab_box = [];
-
-                /* Group response items per tab box. */
-                for (var i = 0 ; i < json.length ; i++) {
-                    if (json[i][0] != current) {
-                        _this.create_single_selector(tab_box, current);
-                        current = json[i][0];
-                        tab_box = [];
-                    }
-                    tab_box.push(json[i]);
-                }
-                _this.create_single_selector(tab_box, current);
+                /* Create selectors. */
+                _this.create_selectors(json);
 
             },
 
@@ -83,6 +73,24 @@ define(['jquery',
 
         });
 
+    };
+
+    MGR.prototype.create_selectors = function(rest_response) {
+
+        /* Initiate variables. */
+        var current = '1';
+        var tab_box = [];
+
+        /* Group response items per tab box. */
+        for (var i = 0 ; i < rest_response.length ; i++) {
+            if (rest_response[i][0] != current) {
+                this.create_single_selector(tab_box, current);
+                current = rest_response[i][0];
+                tab_box = [];
+            }
+            tab_box.push(rest_response[i]);
+        }
+        this.create_single_selector(tab_box, current);
     };
 
     MGR.prototype.create_single_selector = function(tab_box_definition, selector_id) {
@@ -105,19 +113,16 @@ define(['jquery',
         for (var i = 0 ; i < tab_box_definition.length ; i++)
             tab_json_definitions.push(this.create_tab_json(tab_box_definition[i]));
 
-        console.log(tab_json_definitions);
-        console.log(_this.CONFIG.prefix + selector_id);
-
-        /* Load selector module. */
-        require(['FAOSTAT_DOWNLOAD_SELECTOR'], function(SELECTOR) {
-            var selector = new SELECTOR();
-            selector.init({
-                lang: _this.CONFIG.lang,
-                placeholder_id: _this.CONFIG.prefix + selector_id,
-                suffix: '_' + selector_id,
-                tabs: tab_json_definitions
-            });
+        /* Create selector. */
+        var selector = new SELECTOR();
+        selector.init({
+            lang: _this.CONFIG.lang,
+            placeholder_id: _this.CONFIG.prefix + selector_id,
+            suffix: '_' + selector_id,
+            tabs: tab_json_definitions
         });
+        _this.CONFIG.selectors.push(selector);
+
     };
 
     MGR.prototype.create_tab_json =  function(tab_definition) {
