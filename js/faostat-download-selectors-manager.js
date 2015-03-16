@@ -121,6 +121,8 @@ define(['jquery',
             suffix: '_' + selector_id,
             tabs: tab_json_definitions
         });
+
+        /* Store selector object for future reference. */
         _this.CONFIG.selectors.push(selector);
 
     };
