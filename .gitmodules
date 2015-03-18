@@ -1,3 +1,0 @@
-[submodule "js/modules/faostat-download-selector"]
-	path = js/modules/faostat-download-selector
-	url = https://github.com/FAOSTAT3/faostat-download-selector.git
