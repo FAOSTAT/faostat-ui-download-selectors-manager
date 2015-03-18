@@ -1,8 +1,8 @@
 define(['jquery',
         'handlebars',
-        'text!faostat_download_selectors_manager/html/templates.html',
-        'i18n!faostat_download_selectors_manager/nls/translate',
-        'FAOSTAT_DOWNLOAD_SELECTOR',
+        'text!faostat_ui_download_selectors_manager/html/templates.html',
+        'i18n!faostat_ui_download_selectors_manager/nls/translate',
+        'FAOSTAT_UI_DOWNLOAD_SELECTOR',
         'bootstrap',
         'sweetAlert',
         'amplify'], function ($, Handlebars, templates, translate, SELECTOR) {
