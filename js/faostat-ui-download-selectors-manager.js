@@ -145,6 +145,19 @@ define(['jquery',
         return s;
     };
 
+    MGR.prototype.get_user_selection = function() {
+        var out = {};
+        /* FAOSTAT procedures require exactly 7 filtering arrays. */
+        for (var i = 0 ; i < 7 ; i++) {
+            try {
+                out['list' + (1 + i) + 'Codes'] = this.CONFIG.selectors[i].get_user_selection();
+            } catch (e) {
+                out['list' + (1 + i) + 'Codes'] = [];
+            }
+        }
+        return out;
+    };
+
     return MGR;
 
 });
