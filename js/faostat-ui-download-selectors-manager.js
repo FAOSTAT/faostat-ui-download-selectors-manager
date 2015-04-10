@@ -37,8 +37,6 @@ define(['jquery',
         /* Store FAOSTAT language. */
         this.CONFIG.lang_faostat = Commons.iso2faostat(this.CONFIG.lang);
 
-        console.log(this.CONFIG);
-
         /* This... */
         var _this = this;
 
@@ -54,7 +52,7 @@ define(['jquery',
         /* Query DB for the domain structure. */
         $.ajax({
 
-            url: this.CONFIG.url_listboxes + '/' + this.CONFIG.datasource + '/' + this.CONFIG.domain + '/' + this.CONFIG.lang,
+            url: this.CONFIG.url_listboxes + '/' + this.CONFIG.datasource + '/' + this.CONFIG.domain + '/' + this.CONFIG.lang_faostat,
             type: 'GET',
             dataType: 'json',
 
@@ -148,7 +146,7 @@ define(['jquery',
         s += this.CONFIG.domain + '/';
         s += tab_definition[0] + '/';
         s += tab_definition[2] + '/';
-        s += this.CONFIG.lang;
+        s += this.CONFIG.lang_faostat;
         return s;
     };
 
