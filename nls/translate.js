@@ -2,6 +2,6 @@ define({
     root : {
         error: 'Error'
     },
-    F : true,
-    S : true
+    fr : true,
+    es : true
 });
