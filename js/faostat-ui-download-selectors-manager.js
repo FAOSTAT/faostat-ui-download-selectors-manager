@@ -1,7 +1,7 @@
 define(['jquery',
         'handlebars',
         'faostat_commons',
-        'text!faostat_ui_download_selectors_manager/html/templates.html',
+        'text!faostat_ui_download_selectors_manager/html/templates.hbs',
         'i18n!faostat_ui_download_selectors_manager/nls/translate',
         'FAOSTAT_UI_DOWNLOAD_SELECTOR',
         'bootstrap',
