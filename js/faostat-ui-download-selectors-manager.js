@@ -20,8 +20,8 @@ define(['jquery',
             prefix: 'fenix_',
             datasource: 'faostatdb',
             placeholder_id: 'placeholder',
-            url_codelists: 'http://faostat3.fao.org/wds/',
-            url_listboxes: 'http://faostat3.fao.org/wds/rest/procedures/listboxes'
+            url_codelists: 'http://fenixapps2.fao.org/wds_5.2.1/',
+            url_listboxes: 'http://fenixapps2.fao.org/wds_5.2.1/rest/procedures/listboxes'
         };
 
     }
