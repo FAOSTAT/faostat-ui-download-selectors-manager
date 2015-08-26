@@ -4,9 +4,9 @@ define(['jquery',
         'text!faostat_ui_download_selectors_manager/html/templates.hbs',
         'i18n!faostat_ui_download_selectors_manager/nls/translate',
         'FAOSTAT_UI_DOWNLOAD_SELECTOR',
-        'bootstrap',
         'sweetAlert',
-        'amplify'], function ($, Handlebars, FAOSTATCommons, templates, translate, SELECTOR) {
+        'bootstrap',
+        'amplify'], function ($, Handlebars, FAOSTATCommons, templates, translate, SELECTOR, swal) {
 
     'use strict';
 
@@ -20,8 +20,8 @@ define(['jquery',
             prefix: 'fenix_',
             datasource: 'faostatdb',
             placeholder_id: 'placeholder',
-            url_codelists: 'http://fenixapps2.fao.org/wds_5.2.1/',
-            url_listboxes: 'http://fenixapps2.fao.org/wds_5.2.1/rest/procedures/listboxes'
+            url_codelists: 'http://fenixapps2.fao.org/wds_5.1/',
+            url_listboxes: 'http://fenixapps2.fao.org/wds_5.1/rest/procedures/listboxes'
         };
 
     }
