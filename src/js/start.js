@@ -72,8 +72,15 @@ define(['jquery',
                     json = $.parseJSON(response);
                 }
 
-                /* Create selectors. */
-                that.create_selectors(json);
+                /* Courtesy message for the wrong code. */
+                if (json.length !== 0) {
+
+                    /* Create selectors. */
+                    that.create_selectors(json);
+
+                } else {
+                    $('#' + that.CONFIG.placeholder_id).html('<h1 class="text-center">' + translate.courtesy + '</h1>');
+                }
 
             },
 
