@@ -1,3 +1,4 @@
+/*global define*/
 define(['jquery',
         'handlebars',
         'faostat_commons',
@@ -26,27 +27,34 @@ define(['jquery',
 
     }
 
-    MGR.prototype.init = function(config) {
+    MGR.prototype.init = function (config) {
 
         /* Extend default configuration. */
         this.CONFIG = $.extend(true, {}, this.CONFIG, config);
 
         /* Fix the language, if needed. */
-        this.CONFIG.lang = this.CONFIG.lang != null ? this.CONFIG.lang : 'E';
+        this.CONFIG.lang = this.CONFIG.lang !== null ? this.CONFIG.lang : 'E';
 
         /* Store FAOSTAT language. */
         this.CONFIG.lang_faostat = FAOSTATCommons.iso2faostat(this.CONFIG.lang);
 
+        /* Variables. */
+        var that,
+            source,
+            template,
+            dynamic_data,
+            html;
+
         /* This... */
-        var _this = this;
+        that = this;
 
         /* Load selectors grid template. */
-        var source = $(templates).filter('#selectors_grid').html();
-        var template = Handlebars.compile(source);
-        var dynamic_data = {
+        source = $(templates).filter('#selectors_grid').html();
+        template = Handlebars.compile(source);
+        dynamic_data = {
             prefix: this.CONFIG.prefix
         };
-        var html = template(dynamic_data);
+        html = template(dynamic_data);
         $('#' + this.CONFIG.placeholder_id).html(html);
 
         /* Query DB for the domain structure. */
@@ -60,11 +68,12 @@ define(['jquery',
 
                 /* Cast the result, if required. */
                 var json = response;
-                if (typeof json == 'string')
+                if (typeof json === 'string') {
                     json = $.parseJSON(response);
+                }
 
                 /* Create selectors. */
-                _this.create_selectors(json);
+                that.create_selectors(json);
 
             },
 
@@ -80,15 +89,16 @@ define(['jquery',
 
     };
 
-    MGR.prototype.create_selectors = function(rest_response) {
+    MGR.prototype.create_selectors = function (rest_response) {
 
         /* Initiate variables. */
-        var current = '1';
-        var tab_box = [];
+        var current = '1',
+            tab_box = [],
+            i;
 
         /* Group response items per tab box. */
-        for (var i = 0 ; i < rest_response.length ; i++) {
-            if (rest_response[i][0] != current) {
+        for (i = 0; i < rest_response.length; i += 1) {
+            if (rest_response[i][0] !== current) {
                 this.create_single_selector(tab_box, current);
                 current = rest_response[i][0];
                 tab_box = [];
@@ -96,50 +106,59 @@ define(['jquery',
             tab_box.push(rest_response[i]);
         }
         this.create_single_selector(tab_box, current);
+
     };
 
-    MGR.prototype.create_single_selector = function(tab_box_definition, selector_id) {
+    MGR.prototype.create_single_selector = function (tab_box_definition, selector_id) {
 
-        /* This... */
-        var _this = this;
+        /* Variables. */
+        var that = this,
+            source,
+            template,
+            dynamic_data,
+            html,
+            tab_json_definitions,
+            i,
+            selector;
 
         /* Add template to the main page. */
-        var source = $(templates).filter('#single_selector').html();
-        var template = Handlebars.compile(source);
-        var dynamic_data = {
+        source = $(templates).filter('#single_selector').html();
+        template = Handlebars.compile(source);
+        dynamic_data = {
             prefix: this.CONFIG.prefix,
             selector_id: selector_id
         };
-        var html = template(dynamic_data);
+        html = template(dynamic_data);
         $('#' + this.CONFIG.prefix + 'selectors_grid').append(html);
 
         /* Create JSON configuration for the selector. */
-        var tab_json_definitions = [];
-        for (var i = 0 ; i < tab_box_definition.length ; i++)
+        tab_json_definitions = [];
+        for (i = 0; i < tab_box_definition.length; i += 1) {
             tab_json_definitions.push(this.create_tab_json(tab_box_definition[i]));
+        }
 
         /* Create selector. */
-        var selector = new SELECTOR();
+        selector = new SELECTOR();
         selector.init({
-            lang: _this.CONFIG.lang,
-            placeholder_id: _this.CONFIG.prefix + selector_id,
+            lang: that.CONFIG.lang,
+            placeholder_id: that.CONFIG.prefix + selector_id,
             suffix: '_' + selector_id,
             tabs: tab_json_definitions
         });
 
         /* Store selector object for future reference. */
-        _this.CONFIG.selectors.push(selector);
+        that.CONFIG.selectors.push(selector);
 
     };
 
-    MGR.prototype.create_tab_json =  function(tab_definition) {
+    MGR.prototype.create_tab_json =  function (tab_definition) {
         var obj = {};
         obj.label = tab_definition[1];
         obj.rest = this.create_listbox_url(tab_definition);
         return obj;
     };
 
-    MGR.prototype.create_listbox_url = function(tab_definition) {
+    MGR.prototype.create_listbox_url = function (tab_definition) {
         var s = this.CONFIG.url_codelists;
         s += 'rest/procedures/usp_GetListBox/';
         s += this.CONFIG.datasource + '/';
@@ -150,10 +169,11 @@ define(['jquery',
         return s;
     };
 
-    MGR.prototype.get_user_selection = function() {
-        var out = {};
+    MGR.prototype.get_user_selection = function () {
+        var out = {},
+            i;
         /* FAOSTAT procedures require exactly 7 filtering arrays. */
-        for (var i = 0 ; i < 7 ; i++) {
+        for (i = 0; i < 7; i += 1) {
             try {
                 out['list' + (1 + i) + 'Codes'] = this.CONFIG.selectors[i].get_user_selection();
             } catch (e) {
