@@ -24,7 +24,10 @@ define(['jquery',
             url_codelists: 'http://fenixapps2.fao.org/wds_5.1/',
             url_listboxes: 'http://fenixapps2.fao.org/wds_5.1/rest/procedures/listboxes',
             rendered: false,
-            rendered_boxes: []
+            rendered_boxes: [],
+            callback: {
+                onSelectionChange: null
+            }
         };
 
     }
@@ -152,7 +155,10 @@ define(['jquery',
             lang: that.CONFIG.lang,
             placeholder_id: that.CONFIG.prefix + selector_id,
             suffix: '_' + selector_id,
-            tabs: tab_json_definitions
+            tabs: tab_json_definitions,
+            callback: {
+                onSelectionChange: that.CONFIG.callback.onSelectionChange
+            }
         });
 
         /* Store selector object for future reference. */
