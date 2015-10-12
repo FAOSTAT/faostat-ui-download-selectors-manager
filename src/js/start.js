@@ -1,13 +1,15 @@
 /*global define*/
+/*jslint nomen: true*/
 define(['jquery',
         'handlebars',
         'faostat_commons',
         'text!faostat_ui_download_selectors_manager/html/templates.hbs',
         'i18n!faostat_ui_download_selectors_manager/nls/translate',
         'FAOSTAT_UI_DOWNLOAD_SELECTOR',
+        'faostatapiclient',
         'sweetAlert',
         'bootstrap',
-        'amplify'], function ($, Handlebars, FAOSTATCommons, templates, translate, SELECTOR, swal) {
+        'amplify'], function ($, Handlebars, FAOSTATCommons, templates, translate, SELECTOR, FAOSTATAPIClient) {
 
     'use strict';
 
@@ -43,6 +45,9 @@ define(['jquery',
         /* Store FAOSTAT language. */
         this.CONFIG.lang_faostat = FAOSTATCommons.iso2faostat(this.CONFIG.lang);
 
+        /* Initiate FAOSTAT API's client. */
+        this.CONFIG.api = new FAOSTATAPIClient();
+
         /* Variables. */
         var that,
             source,
@@ -62,62 +67,32 @@ define(['jquery',
         html = template(dynamic_data);
         $('#' + this.CONFIG.placeholder_id).html(html);
 
-        /* Query DB for the domain structure. */
-        $.ajax({
+        /* Fetch domain structure. */
+        this.CONFIG.api.dimensions({
+            domain_code: this.CONFIG.domain,
+            lang: this.CONFIG.lang
+        }).then(function (json) {
 
-            url: this.CONFIG.url_listboxes + '/' + this.CONFIG.datasource + '/' + this.CONFIG.domain + '/' + this.CONFIG.lang_faostat,
-            type: 'GET',
-            dataType: 'json',
+            /* Prepare the output. */
+            var out = [], i;
 
-            success: function (response) {
-
-                /* Cast the result, if required. */
-                var json = response;
-                if (typeof json === 'string') {
-                    json = $.parseJSON(response);
+            /* Remove extra objects. This is a buf of the API. */
+            for (i = 0; i < json.data.length; i += 1) {
+                if (json.data[i].id !== undefined) {
+                    out.push(json.data[i]);
                 }
+            }
 
-                /* Courtesy message for the wrong code. */
-                if (json.length !== 0) {
-
-                    /* Create selectors. */
-                    that.create_selectors(json);
-
-                } else {
-                    $('#' + that.CONFIG.placeholder_id).html('<h1 class="text-center">' + translate.courtesy + '</h1>');
+            /* Create selectors or show a courtesy message if nothing is retrieved. */
+            if (out.length > 0) {
+                for (i = 0; i < out.length; i += 1) {
+                    that.create_single_selector(out[i], i);
                 }
-
-            },
-
-            error: function (a) {
-                swal({
-                    title: translate.error,
-                    type: 'error',
-                    text: a.responseText
-                });
+            } else {
+                $('#' + that.CONFIG.placeholder_id).html('<h1 class="text-center">' + translate.courtesy + '</h1>');
             }
 
         });
-
-    };
-
-    MGR.prototype.create_selectors = function (rest_response) {
-
-        /* Initiate variables. */
-        var current = '1',
-            tab_box = [],
-            i;
-
-        /* Group response items per tab box. */
-        for (i = 0; i < rest_response.length; i += 1) {
-            if (rest_response[i][0] !== current) {
-                this.create_single_selector(tab_box, current);
-                current = rest_response[i][0];
-                tab_box = [];
-            }
-            tab_box.push(rest_response[i]);
-        }
-        this.create_single_selector(tab_box, current);
 
     };
 
@@ -145,8 +120,8 @@ define(['jquery',
 
         /* Create JSON configuration for the selector. */
         tab_json_definitions = [];
-        for (i = 0; i < tab_box_definition.length; i += 1) {
-            tab_json_definitions.push(this.create_tab_json(tab_box_definition[i]));
+        for (i = 0; i < tab_box_definition.subdimensions.length; i += 1) {
+            tab_json_definitions.push(this.create_tab_json(tab_box_definition.subdimensions[i]));
         }
 
         /* Create selector. */
@@ -171,20 +146,10 @@ define(['jquery',
 
     MGR.prototype.create_tab_json =  function (tab_definition) {
         var obj = {};
-        obj.label = tab_definition[1];
-        obj.rest = this.create_listbox_url(tab_definition);
+        obj.label = tab_definition.label;
+        obj.id = tab_definition.id;
+        obj.domain_code = this.CONFIG.domain;
         return obj;
-    };
-
-    MGR.prototype.create_listbox_url = function (tab_definition) {
-        var s = this.CONFIG.url_codelists;
-        s += 'rest/procedures/usp_GetListBox/';
-        s += this.CONFIG.datasource + '/';
-        s += this.CONFIG.domain + '/';
-        s += tab_definition[0] + '/';
-        s += tab_definition[2] + '/';
-        s += this.CONFIG.lang_faostat;
-        return s;
     };
 
     MGR.prototype.get_user_selection = function () {
