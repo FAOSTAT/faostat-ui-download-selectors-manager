@@ -121,7 +121,7 @@ define(['jquery',
         /* Create JSON configuration for the selector. */
         tab_json_definitions = [];
         for (i = 0; i < tab_box_definition.subdimensions.length; i += 1) {
-            tab_json_definitions.push(this.create_tab_json(tab_box_definition.subdimensions[i]));
+            tab_json_definitions.push(this.create_tab_json(tab_box_definition.id, tab_box_definition.subdimensions[i]));
         }
 
         /* Create selector. */
@@ -144,10 +144,11 @@ define(['jquery',
 
     };
 
-    MGR.prototype.create_tab_json =  function (tab_definition) {
+    MGR.prototype.create_tab_json =  function (group_id, tab_definition) {
         var obj = {};
         obj.label = tab_definition.label;
         obj.id = tab_definition.id;
+        obj.group_id = group_id;
         obj.domain_code = this.CONFIG.domain;
         return obj;
     };
