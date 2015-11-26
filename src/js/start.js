@@ -186,7 +186,10 @@ define(['jquery',
     };
 
     MGR.prototype.dispose = function () {
-
+        var i;
+        for (i = 0; i < this.CONFIG.selectors.length; i += 1) {
+            this.CONFIG.selectors[i].dispose();
+        }
     };
 
     return MGR;
