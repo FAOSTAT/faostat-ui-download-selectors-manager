@@ -185,6 +185,10 @@ define(['jquery',
         return !this.isRendered();
     };
 
+    MGR.prototype.dispose = function () {
+
+    };
+
     return MGR;
 
 });
