@@ -2,14 +2,14 @@
 /*jslint nomen: true*/
 define(['jquery',
         'handlebars',
-        'faostat_commons',
+        'globals/Common',
         'text!faostat_ui_download_selectors_manager/html/templates.hbs',
         'i18n!faostat_ui_download_selectors_manager/nls/translate',
         'FAOSTAT_UI_DOWNLOAD_SELECTOR',
         'faostatapiclient',
         'sweetAlert',
         'bootstrap',
-        'amplify'], function ($, Handlebars, FAOSTATCommons, templates, translate, SELECTOR, FAOSTATAPIClient) {
+        'amplify'], function ($, Handlebars, Common, templates, translate, SELECTOR, FAOSTATAPIClient) {
 
     'use strict';
 
@@ -42,9 +42,6 @@ define(['jquery',
         /* Fix the language, if needed. */
         this.CONFIG.lang = this.CONFIG.lang !== null ? this.CONFIG.lang : 'E';
 
-        /* Store FAOSTAT language. */
-        this.CONFIG.lang_faostat = FAOSTATCommons.iso2faostat(this.CONFIG.lang);
-
         /* Initiate FAOSTAT API's client. */
         this.CONFIG.api = new FAOSTATAPIClient();
 
@@ -70,7 +67,7 @@ define(['jquery',
         /* Fetch domain structure. */
         this.CONFIG.api.dimensions({
             domain_code: this.CONFIG.domain,
-            lang: this.CONFIG.lang
+            lang: Common.getLocale()
         }).then(function (json) {
 
             /* Prepare the output. */
@@ -127,7 +124,7 @@ define(['jquery',
         /* Create selector. */
         selector = new SELECTOR();
         selector.init({
-            lang: that.CONFIG.lang,
+            lang: Common.getLocale(),
             placeholder_id: that.CONFIG.prefix + selector_id,
             suffix: '_' + selector_id,
             tabs: tab_json_definitions,
