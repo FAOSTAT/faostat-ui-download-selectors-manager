@@ -110,9 +110,15 @@ define(['jquery',
         template = Handlebars.compile(source);
         dynamic_data = {
             prefix: this.CONFIG.prefix,
-            selector_id: selector_id
+            selector_id: selector_id,
+            addClearfix: ((selector_id % 2) === 1)
+
         };
+
+        console.log(((selector_id % 2) === 1))
         html = template(dynamic_data);
+
+        // TODO: change row hack
         $('#' + this.CONFIG.prefix + 'selectors_grid').append(html);
 
         /* Create JSON configuration for the selector. */
