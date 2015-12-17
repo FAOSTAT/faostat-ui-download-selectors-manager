@@ -115,7 +115,6 @@ define(['jquery',
 
         };
 
-        console.log(((selector_id % 2) === 1))
         html = template(dynamic_data);
 
         // TODO: change row hack
@@ -153,6 +152,7 @@ define(['jquery',
         obj.id = tab_definition.id;
         obj.group_id = group_id;
         obj.domain_code = this.CONFIG.domain;
+        obj.coding_systems = tab_definition.coding_systems;
         return obj;
     };
 
@@ -186,6 +186,13 @@ define(['jquery',
 
     MGR.prototype.isNotRendered = function () {
         return !this.isRendered();
+    };
+
+    MGR.prototype.get_selected_coding_system = function (selector_idx) {
+        if (this.CONFIG.selectors[selector_idx] === undefined) {
+            return null;
+        }
+        return this.CONFIG.selectors[selector_idx].get_selected_coding_system();
     };
 
     MGR.prototype.dispose = function () {
