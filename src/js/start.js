@@ -16,15 +16,10 @@ define(['jquery',
     function MGR() {
 
         this.CONFIG = {
-            lang: 'E',
-            lang_faostat: 'E',
             domain: 'GT',
             selectors: [],
             prefix: 'fenix_',
-            datasource: 'faostatdb',
             placeholder_id: 'placeholder',
-            url_codelists: 'http://fenixapps2.fao.org/wds_5.1/',
-            url_listboxes: 'http://fenixapps2.fao.org/wds_5.1/rest/procedures/listboxes',
             rendered: false,
             rendered_boxes: [],
             callback: {
