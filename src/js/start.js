@@ -34,9 +34,6 @@ define(['jquery',
         /* Extend default configuration. */
         this.CONFIG = $.extend(true, {}, this.CONFIG, config);
 
-        /* Fix the language, if needed. */
-        this.CONFIG.lang = this.CONFIG.lang !== null ? this.CONFIG.lang : 'E';
-
         /* Initiate FAOSTAT API's client. */
         this.CONFIG.api = new FAOSTATAPIClient();
 
@@ -58,6 +55,8 @@ define(['jquery',
         };
         html = template(dynamic_data);
         $('#' + this.CONFIG.placeholder_id).html(html);
+
+        // TODO: add switch with the report dimensions?
 
         /* Fetch domain structure. */
         this.CONFIG.api.dimensions({
@@ -195,6 +194,7 @@ define(['jquery',
         for (i = 0; i < this.CONFIG.selectors.length; i += 1) {
             this.CONFIG.selectors[i].dispose();
         }
+        $('#' + this.CONFIG.placeholder_id).empty();
     };
 
     return MGR;
