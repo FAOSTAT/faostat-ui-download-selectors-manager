@@ -1,15 +1,16 @@
 /*global define*/
 /*jslint nomen: true*/
 define(['jquery',
-        'handlebars',
-        'globals/Common',
-        'text!faostat_ui_download_selectors_manager/html/templates.hbs',
-        'i18n!faostat_ui_download_selectors_manager/nls/translate',
-        'FAOSTAT_UI_DOWNLOAD_SELECTOR',
-        'faostatapiclient',
-        'sweetAlert',
-        'bootstrap',
-        'amplify'], function ($, Handlebars, Common, templates, translate, SELECTOR, FAOSTATAPIClient) {
+    'loglevel',
+    'handlebars',
+    'globals/Common',
+    'text!faostat_ui_download_selectors_manager/html/templates.hbs',
+    'i18n!faostat_ui_download_selectors_manager/nls/translate',
+    'FAOSTAT_UI_DOWNLOAD_SELECTOR',
+    'faostatapiclient',
+    'sweetAlert',
+    'bootstrap',
+    'amplify'], function ($, log, Handlebars, Common, templates, translate, SELECTOR, FAOSTATAPIClient) {
 
     'use strict';
 
@@ -21,6 +22,7 @@ define(['jquery',
             prefix: 'fenix_',
             placeholder_id: 'placeholder',
             rendered: false,
+            multiple: true,
             rendered_boxes: [],
             callback: {
                 onSelectionChange: null
@@ -34,18 +36,17 @@ define(['jquery',
         /* Extend default configuration. */
         this.CONFIG = $.extend(true, {}, this.CONFIG, config);
 
+        log.info('selector_manager config', this.CONFIG, config)
+
         /* Initiate FAOSTAT API's client. */
         this.CONFIG.api = new FAOSTATAPIClient();
 
         /* Variables. */
-        var that,
+        var that = this,
             source,
             template,
             dynamic_data,
             html;
-
-        /* This... */
-        that = this;
 
         /* Load selectors grid template. */
         source = $(templates).filter('#selectors_grid').html();
@@ -61,11 +62,14 @@ define(['jquery',
         /* Fetch domain structure. */
         this.CONFIG.api.dimensions({
             domain_code: this.CONFIG.domain,
+            report_code: this.CONFIG.report_code || "download",
             lang: Common.getLocale()
         }).then(function (json) {
 
             /* Prepare the output. */
             var out = [], i;
+
+            that.dimensions = json;
 
             /* Remove extra objects. This is a buf of the API. */
             for (i = 0; i < json.data.length; i += 1) {
@@ -77,7 +81,7 @@ define(['jquery',
             /* Create selectors or show a courtesy message if nothing is retrieved. */
             if (out.length > 0) {
                 for (i = 0; i < out.length; i += 1) {
-                    that.create_single_selector(out[i], i);
+                    that.create_single_selector(out[i], i, json);
                 }
             } else {
                 $('#' + that.CONFIG.placeholder_id).html('<h1 class="text-center">' + translate.courtesy + '</h1>');
@@ -88,6 +92,8 @@ define(['jquery',
     };
 
     MGR.prototype.create_single_selector = function (tab_box_definition, selector_id) {
+
+        log.info(tab_box_definition)
 
         /* Variables. */
         var that = this,
@@ -106,7 +112,6 @@ define(['jquery',
             prefix: this.CONFIG.prefix,
             selector_id: selector_id,
             addClearfix: ((selector_id % 2) === 1)
-
         };
 
         html = template(dynamic_data);
@@ -124,12 +129,21 @@ define(['jquery',
         selector = new SELECTOR();
         selector.init({
             lang: Common.getLocale(),
-            placeholder_id: that.CONFIG.prefix + selector_id,
+            placeholder_id: this.CONFIG.prefix + selector_id,
             suffix: '_' + selector_id,
+
+            // TODO: show list and multiple should be connected togheter?
+            multiple: this.CONFIG.multiple,
+            show_lists: this.CONFIG.multiple,
+
             tabs: tab_json_definitions,
             callback: {
                 onSelectionChange: that.CONFIG.callback.onSelectionChange
-            }
+            },
+
+            // are the selector metadata
+            // used for the 'parameter',
+            options: tab_box_definition
         });
 
         /* Store selector object for future reference. */
@@ -153,13 +167,24 @@ define(['jquery',
     MGR.prototype.get_user_selection = function () {
         var out = {},
             i;
+
+
+        // TODO: this should be rethought. 'parameter' should be used in the request.
+
         /* FAOSTAT procedures require exactly 7 filtering arrays. */
         for (i = 0; i < 7; i += 1) {
+
+            log.info(this.CONFIG.selectors[i])
+
+
+            // TODO: this doesn't work with less parameters or with a different list
             try {
+
                 out['list' + (1 + i) + 'Codes'] = this.CONFIG.selectors[i].get_user_selection();
             } catch (e) {
                 out['list' + (1 + i) + 'Codes'] = [];
             }
+
         }
         return out;
     };
@@ -186,6 +211,7 @@ define(['jquery',
         if (this.CONFIG.selectors[selector_idx] === undefined) {
             return null;
         }
+        log.info("MGR.get_selected_coding_system; index", selector_idx, this.CONFIG.selectors[selector_idx].get_selected_coding_system());
         return this.CONFIG.selectors[selector_idx].get_selected_coding_system();
     };
 
