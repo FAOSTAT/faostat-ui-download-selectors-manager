@@ -121,7 +121,7 @@ define([
 
         _.each(this.selectors, function(s) {
             selections.push(s.getSelections());
-        })
+        });
 
         log.info('SelectorsManager.getSelections; ' + selections);
 
@@ -138,10 +138,7 @@ define([
 
     SelectorsManager.prototype.isEmpty = function (selections) {
 
-        log.info(selections)
-
         for(var i=0; i < selections.length; i++) {
-            log.info(selections[i])
             if (selections[i] === undefined || selections[i].codes.length <= 0) {
                 log.error('SelectorsManager.isEmpty; Selector (', i, ') is Empty' );
                 return true;
