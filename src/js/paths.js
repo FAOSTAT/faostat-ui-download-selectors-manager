@@ -3,21 +3,30 @@ define(function () {
 
     'use strict';
 
-    var config;
-    config = {
-        paths: {
-            FAOSTAT_UI_DOWNLOAD_SELECTORS_MANAGER: 'start',
-            faostat_ui_download_selectors_manager: '../../'
-            //FAOSTAT_UI_DOWNLOAD_SELECTOR: '../../submodules/faostat-ui-download-selector/src/js/start',
-            //faostat_ui_download_selector: '../../submodules/faostat-ui-download-selector'
+    var config = {
+
+        paths : {
+            'fs-s-m/start': './start',
+            'fs-s-m/html': '../html',
+            'fs-s-m/config': '../../config',
+            'fs-s-m/nls': '../../nls',
+
+            // third party libs
+            jquery: '{FENIX_CDN}/js/jquery/2.1.1/jquery.min',
+            underscore: '{FENIX_CDN}/js/underscore/1.7.0/underscore.min',
+            amplify: '{FENIX_CDN}/js/amplify/1.1.2/amplify.min',
+            handlebars: '{FENIX_CDN}/js/handlebars/2.0.0/handlebars',
+            loglevel: '{FENIX_CDN}/js/loglevel/1.4.0/loglevel',
+            i18n: "{FENIX_CDN}/js/requirejs/plugins/i18n/2.0.4/i18n"
+
         },
+
         shim: {
-            bootstrap: {
-                deps: ['jquery']
+            "amplify": {
+                "deps": ["jquery"]
             }
         }
     };
 
     return config;
-
 });

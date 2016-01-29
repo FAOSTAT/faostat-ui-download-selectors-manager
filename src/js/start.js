@@ -1,228 +1,178 @@
 /*global define*/
 /*jslint nomen: true*/
-define(['jquery',
+define([
+    'jquery',
     'loglevel',
-    'handlebars',
+    'config/Config',
     'globals/Common',
-    'text!faostat_ui_download_selectors_manager/html/templates.hbs',
-    'i18n!faostat_ui_download_selectors_manager/nls/translate',
-    'FAOSTAT_UI_DOWNLOAD_SELECTOR',
+    'text!fs-s-m/html/template.hbs',
     'faostatapiclient',
-    'sweetAlert',
-    'bootstrap',
-    'amplify'], function ($, log, Handlebars, Common, templates, translate, SELECTOR, FAOSTATAPIClient) {
+    'fs-s/start',
+    'handlebars',
+    'underscore',
+    // Add selector
+    'amplify'
+], function ($, log, C, Common, template, FAOSTATAPIClient, Selector, Handlebars, _) {
 
     'use strict';
 
-    function MGR() {
+    var s = {
 
-        this.CONFIG = {
-            domain: 'GT',
-            selectors: [],
-            prefix: 'fenix_',
-            placeholder_id: 'placeholder',
-            rendered: false,
-            multiple: true,
-            rendered_boxes: [],
-            callback: {
-                onSelectionChange: null
-            }
+            SELECTORS_GRID: '[data-role="selectors_grid"]'
+
+
+        },
+        defaultOptions = {
+
+            validateEmptySelection: true
+
         };
+
+    function SelectorsManager() {
+
+        return this;
 
     }
 
-    MGR.prototype.init = function (config) {
+    SelectorsManager.prototype.init = function (config) {
 
-        /* Extend default configuration. */
-        this.CONFIG = $.extend(true, {}, this.CONFIG, config);
+        this.o = $.extend(true, {}, defaultOptions, config);
+        this.api = new FAOSTATAPIClient();
 
-        log.info('selector_manager config', this.CONFIG, config)
+        log.info('SelectorsManager.init;', this.o);
 
-        /* Initiate FAOSTAT API's client. */
-        this.CONFIG.api = new FAOSTATAPIClient();
-
-        /* Variables. */
-        var that = this,
-            source,
-            template,
-            dynamic_data,
-            html;
-
-        /* Load selectors grid template. */
-        source = $(templates).filter('#selectors_grid').html();
-        template = Handlebars.compile(source);
-        dynamic_data = {
-            prefix: this.CONFIG.prefix
-        };
-        html = template(dynamic_data);
-        $('#' + this.CONFIG.placeholder_id).html(html);
-
-        // TODO: add switch with the report dimensions?
-
-        /* Fetch domain structure. */
-        this.CONFIG.api.dimensions({
-            domain_code: this.CONFIG.domain,
-            report_code: this.CONFIG.report_code || "download",
-            lang: Common.getLocale()
-        }).then(function (json) {
-
-            /* Prepare the output. */
-            var out = [], i;
-
-            that.dimensions = json;
-
-            /* Remove extra objects. This is a buf of the API. */
-            for (i = 0; i < json.data.length; i += 1) {
-                if (json.data[i].id !== undefined) {
-                    out.push(json.data[i]);
-                }
-            }
-
-            /* Create selectors or show a courtesy message if nothing is retrieved. */
-            if (out.length > 0) {
-                for (i = 0; i < out.length; i += 1) {
-                    that.create_single_selector(out[i], i, json);
-                }
-            } else {
-                $('#' + that.CONFIG.placeholder_id).html('<h1 class="text-center">' + translate.courtesy + '</h1>');
-            }
-
-        });
+        this.initVariables();
+        this.initComponents();
+        this.bindEventListeners();
 
     };
 
-    MGR.prototype.create_single_selector = function (tab_box_definition, selector_id) {
+    SelectorsManager.prototype.initVariables = function () {
 
-        log.info(tab_box_definition)
+        this.$CONTAINER = $(this.o.container);
 
-        /* Variables. */
-        var that = this,
-            source,
-            template,
-            dynamic_data,
-            html,
-            tab_json_definitions,
-            i,
-            selector;
+        var html = $(template).filter('#selector_manager_container').html(),
+        t = Handlebars.compile(html);
 
-        /* Add template to the main page. */
-        source = $(templates).filter('#single_selector').html();
-        template = Handlebars.compile(source);
-        dynamic_data = {
-            prefix: this.CONFIG.prefix,
-            selector_id: selector_id,
-            addClearfix: ((selector_id % 2) === 1)
-        };
+        // init structure
+        this.$CONTAINER.html(t({}));
 
-        html = template(dynamic_data);
+        // init grid
+        this.$SELECTORS_GRID = this.$CONTAINER.find(s.SELECTORS_GRID);
 
-        // TODO: change row hack
-        $('#' + this.CONFIG.prefix + 'selectors_grid').append(html);
+    };
 
-        /* Create JSON configuration for the selector. */
-        tab_json_definitions = [];
-        for (i = 0; i < tab_box_definition.subdimensions.length; i += 1) {
-            tab_json_definitions.push(this.create_tab_json(tab_box_definition.id, tab_box_definition.subdimensions[i]));
-        }
+    SelectorsManager.prototype.initComponents = function () {
 
-        /* Create selector. */
-        selector = new SELECTOR();
-        selector.init({
+        var code = this.o.code,
+            self = this;
+
+        // initialize selectors
+        this.selectors = [];
+
+
+        // retrieve all dimensions
+        this.api.dimensions({
+            datasource: C.DATASOURCE,
             lang: Common.getLocale(),
-            placeholder_id: this.CONFIG.prefix + selector_id,
-            suffix: '_' + selector_id,
+            domain_code: code
+        }).then(function(dimensions) {
 
-            // TODO: show list and multiple should be connected togheter?
-            multiple: this.CONFIG.multiple,
-            show_lists: this.CONFIG.multiple,
+            self.o.dimensions = dimensions;
 
-            tabs: tab_json_definitions,
-            callback: {
-                onSelectionChange: that.CONFIG.callback.onSelectionChange
-            },
+            _.each(dimensions.data, function (d, index) {
+                self.selectors.push(self.createSelector(d, index));
+            });
 
-            // are the selector metadata
-            // used for the 'parameter',
-            options: tab_box_definition
         });
 
-        /* Store selector object for future reference. */
-        that.CONFIG.selectors.push(selector);
-
-        /* Keep track of the rendered selector. */
-        this.CONFIG.rendered_boxes.push(selector_id);
-
     };
 
-    MGR.prototype.create_tab_json =  function (group_id, tab_definition) {
-        var obj = {};
-        obj.label = tab_definition.label;
-        obj.id = tab_definition.id;
-        obj.group_id = group_id;
-        obj.domain_code = this.CONFIG.domain;
-        obj.coding_systems = tab_definition.coding_systems;
-        return obj;
+    // create a single selector
+    SelectorsManager.prototype.createSelector = function (dimension, index) {
+
+      // init selector div
+      var selector = new Selector(),
+          code = this.o.code,
+          html = $(template).filter('#single_selector').html(),
+          t = Handlebars.compile(html),
+          id = 'selector_' + Math.random().toString().replace('.', '');
+
+        this.$SELECTORS_GRID.append(t({
+            id: id,
+            addClearFix: (index % 2)? true: false
+        }));
+
+        // add selector container
+        selector.init($.extend(true, {},
+            dimension,
+            {
+                container: this.$SELECTORS_GRID.find('#' + id),
+                code: code,
+                dimension: dimension
+            }));
+
+        return selector;
     };
 
-    MGR.prototype.get_user_selection = function () {
-        var out = {},
-            i;
+    SelectorsManager.prototype.getSelections = function () {
 
+        var selections = [];
 
-        // TODO: this should be rethought. 'parameter' should be used in the request.
+        _.each(this.selectors, function(s) {
+            selections.push(s.getSelections());
+        })
 
-        /* FAOSTAT procedures require exactly 7 filtering arrays. */
-        for (i = 0; i < 7; i += 1) {
+        log.info('SelectorsManager.getSelections; ' + selections);
 
-            log.info(this.CONFIG.selectors[i])
-
-
-            // TODO: this doesn't work with less parameters or with a different list
-            try {
-
-                out['list' + (1 + i) + 'Codes'] = this.CONFIG.selectors[i].get_user_selection();
-            } catch (e) {
-                out['list' + (1 + i) + 'Codes'] = [];
-            }
-
-        }
-        return out;
-    };
-
-    MGR.prototype.isRendered = function () {
-        var tmp,
-            i;
-        for (i = 0; i < this.CONFIG.selectors.length; i += 1) {
-            if (tmp === undefined) {
-                tmp = this.CONFIG.selectors[i].isRendered();
-            } else {
-                tmp = tmp && this.CONFIG.selectors[i].isRendered();
+        // validate if one selection is empty
+        if ( this.o.validateEmptySelection ) {
+            if ( this.isEmpty(selections) ) {
+                throw new Error("The user didn't select at least one item");
             }
         }
-        this.CONFIG.rendered = tmp !== undefined ? tmp : false;
-        return this.CONFIG.rendered;
+
+        return selections;
+
     };
 
-    MGR.prototype.isNotRendered = function () {
-        return !this.isRendered();
-    };
+    SelectorsManager.prototype.isEmpty = function (selections) {
 
-    MGR.prototype.get_selected_coding_system = function (selector_idx) {
-        if (this.CONFIG.selectors[selector_idx] === undefined) {
-            return null;
+        log.info(selections)
+
+        for(var i=0; i < selections.length; i++) {
+            log.info(selections[i])
+            if (selections[i] === undefined || selections[i].codes.length <= 0) {
+                log.error('SelectorsManager.isEmpty; Selector (', i, ') is Empty' );
+                return true;
+            }
         }
-        log.info("MGR.get_selected_coding_system; index", selector_idx, this.CONFIG.selectors[selector_idx].get_selected_coding_system());
-        return this.CONFIG.selectors[selector_idx].get_selected_coding_system();
+
+        return false;
+
     };
 
-    MGR.prototype.dispose = function () {
-        var i;
-        for (i = 0; i < this.CONFIG.selectors.length; i += 1) {
-            this.CONFIG.selectors[i].dispose();
-        }
-        $('#' + this.CONFIG.placeholder_id).empty();
+    SelectorsManager.prototype.bindEventListeners = function () {
+
     };
 
-    return MGR;
+    SelectorsManager.prototype.unbindEventListeners = function () {
+
+    };
+
+    SelectorsManager.prototype.destroy = function () {
+
+        log.info('SelectorsManager.destroy;');
+
+        // for each Selector call it's destroy
+        _.each(this.selectors, function(s) {
+            if(s && s.destroy) {
+                s.destroy();
+            }
+        });
+
+    };
+
+    return SelectorsManager;
 
 });
