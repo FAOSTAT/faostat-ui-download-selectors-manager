@@ -20,7 +20,6 @@ define([
 
             SELECTORS_GRID: '[data-role="selectors_grid"]'
 
-
         },
         defaultOptions = {
 
@@ -65,6 +64,7 @@ define([
     SelectorsManager.prototype.initComponents = function () {
 
         var code = this.o.code,
+            report_code = this.o.report_code || null,
             self = this;
 
         // initialize selectors
@@ -75,7 +75,8 @@ define([
         this.api.dimensions({
             datasource: C.DATASOURCE,
             lang: Common.getLocale(),
-            domain_code: code
+            domain_code: code,
+            report_code: report_code
         }).then(function(dimensions) {
 
             self.o.dimensions = dimensions;
@@ -96,12 +97,15 @@ define([
           code = this.o.code,
           html = $(template).filter('#single_selector').html(),
           t = Handlebars.compile(html),
-          id = 'selector_' + Math.random().toString().replace('.', '');
+          id = 'selector_' + Math.random().toString().replace('.', ''),
+          multipleSelection = this.o.multiple;
 
         this.$SELECTORS_GRID.append(t({
             id: id,
             addClearFix: (index % 2)? true: false
         }));
+
+        log.info(multipleSelection)
 
         // add selector container
         selector.init($.extend(true, {},
@@ -109,7 +113,8 @@ define([
             {
                 container: this.$SELECTORS_GRID.find('#' + id),
                 code: code,
-                dimension: dimension
+                dimension: dimension,
+                multiple: multipleSelection
             }));
 
         return selector;
