@@ -105,7 +105,7 @@ define([
             addClearFix: (index % 2)? true: false
         }));
 
-        log.info(multipleSelection)
+        log.info("SelectorsManager.createSelector; dimension", dimension);
 
         // add selector container
         selector.init($.extend(true, {},
@@ -114,6 +114,7 @@ define([
                 container: this.$SELECTORS_GRID.find('#' + id),
                 code: code,
                 dimension: dimension,
+                // TODO: this should be at the level of subdimension
                 multiple: multipleSelection
             }));
 
