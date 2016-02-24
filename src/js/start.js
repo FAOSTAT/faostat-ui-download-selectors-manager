@@ -79,10 +79,11 @@ define([
             report_code: report_code
         }).then(function(dimensions) {
 
+            var parameters = dimensions.metadata.parameters;
             self.o.dimensions = dimensions;
 
             _.each(dimensions.data, function (d, index) {
-                self.selectors.push(self.createSelector(d, index));
+                self.selectors.push(self.createSelector(d, parameters, index));
             });
 
         });
@@ -90,7 +91,7 @@ define([
     };
 
     // create a single selector
-    SelectorsManager.prototype.createSelector = function (dimension, index) {
+    SelectorsManager.prototype.createSelector = function (dimension, parameters, index) {
 
       // init selector div
       var selector = new Selector(),
@@ -105,7 +106,7 @@ define([
             addClearFix: (index % 2)? true: false
         }));
 
-        log.info("SelectorsManager.createSelector; dimension", dimension);
+        log.info("SelectorsManager.createSelector; dimension", dimension, parameters);
 
         // add selector container
         selector.init($.extend(true, {},
@@ -113,6 +114,8 @@ define([
             {
                 container: this.$SELECTORS_GRID.find('#' + id),
                 code: code,
+                // TODO: report_code should came from the dimension API?
+                report_code: parameters.report_code,
                 dimension: dimension,
                 // TODO: this should be at the level of subdimension
                 multiple: multipleSelection
