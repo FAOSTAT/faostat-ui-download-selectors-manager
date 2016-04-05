@@ -1,9 +1,10 @@
-/*global define*/
+/*global define, amplify*/
 /*jslint nomen: true*/
 define([
     'jquery',
     'loglevel',
     'config/Config',
+    'config/Events',
     'globals/Common',
     'text!fs-s-m/html/template.hbs',
     'faostatapiclient',
@@ -12,7 +13,7 @@ define([
     'underscore',
     // Add selector
     'amplify'
-], function ($, log, C, Common, template, FAOSTATAPIClient, Selector, Handlebars, _) {
+], function ($, log, C, E, Common, template, FAOSTATAPIClient, Selector, Handlebars, _) {
 
     'use strict';
 
@@ -59,6 +60,8 @@ define([
         // init grid
         this.$SELECTORS_GRID = this.$CONTAINER.find(s.SELECTORS_GRID);
 
+        amplify.publish(E.LOADING_SHOW, { container: this.$CONTAINER });
+
     };
 
     SelectorsManager.prototype.initComponents = function () {
@@ -78,6 +81,8 @@ define([
             domain_code: code,
             report_code: report_code
         }).then(function(dimensions) {
+
+            amplify.publish(E.LOADING_HIDE, { container: self.$CONTAINER });
 
             var parameters = dimensions.metadata.parameters;
             self.o.dimensions = dimensions;
