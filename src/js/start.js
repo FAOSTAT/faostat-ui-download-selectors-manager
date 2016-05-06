@@ -177,7 +177,7 @@ define([
 
         // for each Selector call it's destroy
         _.each(this.selectors, function(s) {
-            if(s && s.destroy) {
+            if(s && _.isFunction(s.destroy)) {
                 s.destroy();
             }
         });
