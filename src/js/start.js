@@ -18,6 +18,17 @@ define([
     'use strict';
 
     var s = {
+            SELECTORS_GRID: '[data-role="selectors_grid"]'
+    },
+    templateFilter = {
+        CONTAINER: '#selector_manager_container',
+        SINGLE_SELECTOR: '#single_selector'
+    },
+    defaultOptions = {
+        validateEmptySelection: true
+    };
+
+   /* var s = {
 
             SELECTORS_GRID: '[data-role="selectors_grid"]'
 
@@ -26,7 +37,7 @@ define([
 
             validateEmptySelection: true
 
-        };
+        };*/
 
     function SelectorsManager() {
 
@@ -51,7 +62,7 @@ define([
 
         this.$CONTAINER = $(this.o.container);
 
-        var html = $(template).filter('#selector_manager_container').html(),
+        var html = $(template).filter(templateFilter.CONTAINER).html(),
         t = Handlebars.compile(html);
 
         // init structure
@@ -73,7 +84,6 @@ define([
         // initialize selectors
         this.selectors = [];
 
-
         // retrieve all dimensions
         this.api.dimensions({
             datasource: C.DATASOURCE,
@@ -84,7 +94,10 @@ define([
 
             amplify.publish(E.LOADING_HIDE, { container: self.$CONTAINER });
 
-            var parameters = dimensions.metadata.parameters;
+            //var parameters = dimensions.metadata.parameters || {};
+            var parameters = {
+                report_code: report_code
+            };
             self.o.dimensions = dimensions;
 
             _.each(dimensions.data, function (d, index) {
@@ -101,7 +114,7 @@ define([
       // init selector div
       var selector = new Selector(),
           code = this.o.code,
-          html = $(template).filter('#single_selector').html(),
+          html = $(template).filter(templateFilter.SINGLE_SELECTOR).html(),
           t = Handlebars.compile(html),
           id = 'selector_' + Math.random().toString().replace('.', ''),
           multipleSelection = this.o.multiple;
@@ -169,6 +182,11 @@ define([
 
     SelectorsManager.prototype.unbindEventListeners = function () {
 
+    };
+
+    SelectorsManager.prototype.isValid = function (dimensions) {
+        // TODO: to implement a validation
+        return truel
     };
 
     SelectorsManager.prototype.destroy = function () {
