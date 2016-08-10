@@ -89,7 +89,8 @@ define([
             datasource: C.DATASOURCE,
             lang: Common.getLocale(),
             domain_code: code,
-            report_code: report_code
+            report_code: report_code,
+            full: true
         }).then(function(dimensions) {
 
             amplify.publish(E.LOADING_HIDE, { container: self.$CONTAINER });
