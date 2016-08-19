@@ -105,6 +105,10 @@ define([
                 self.selectors.push(self.createSelector(d, parameters, index));
             });
 
+        }).catch(function(e) {
+            log.error("SelectorsManager.initComponents; API Problem on retrieving dimensions.");
+            amplify.publish(E.CONNECTION_PROBLEM);
+            //amplify.publish(E.LOADING_HIDE, { container: self.$CONTAINER });
         });
 
     };
