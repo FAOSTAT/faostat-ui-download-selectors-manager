@@ -3,9 +3,7 @@
 define([
     'jquery',
     'loglevel',
-    'config/Config',
     'config/Events',
-    'globals/Common',
     'text!fs-s-m/html/template.hbs',
     'faostatapiclient',
     'fs-s/start',
@@ -13,7 +11,7 @@ define([
     'underscore',
     // Add selector
     'amplify'
-], function ($, log, C, E, Common, template, FAOSTATAPIClient, Selector, Handlebars, _) {
+], function ($, log, E, template, API, Selector, Handlebars, _) {
 
     'use strict';
 
@@ -48,7 +46,6 @@ define([
     SelectorsManager.prototype.init = function (config) {
 
         this.o = $.extend(true, {}, defaultOptions, config);
-        this.api = new FAOSTATAPIClient();
 
         log.info('SelectorsManager.init;', this.o);
 
@@ -85,9 +82,7 @@ define([
         this.selectors = [];
 
         // retrieve all dimensions
-        this.api.dimensions({
-            datasource: C.DATASOURCE,
-            lang: Common.getLocale(),
+        API.dimensions({
             domain_code: code,
             report_code: report_code,
             full: true
