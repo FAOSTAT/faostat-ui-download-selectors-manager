@@ -1,9 +1,6 @@
 /*global define*/
 define({
-    root : {
-        error: 'Error',
-        courtesy: 'There is no data available for the selected FAOSTAT Domain.<br>We apologize for any inconvenience.'
-    },
+    root : {},
     fr : true,
     es : true
 });

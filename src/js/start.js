@@ -26,17 +26,6 @@ define([
         validateEmptySelection: true
     };
 
-   /* var s = {
-
-            SELECTORS_GRID: '[data-role="selectors_grid"]'
-
-        },
-        defaultOptions = {
-
-            validateEmptySelection: true
-
-        };*/
-
     function SelectorsManager() {
 
         return this;
