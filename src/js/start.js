@@ -139,7 +139,7 @@ define([
             selections.push(s.getSelections());
         });
 
-        log.info('SelectorsManager.getSelections; ' + selections);
+        log.info('SelectorsManager.getSelections; ', selections);
 
         // validate if one selection is empty
         if ( this.o.validateEmptySelection ) {
