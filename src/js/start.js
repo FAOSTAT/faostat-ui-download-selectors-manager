@@ -65,17 +65,18 @@ define([
 
         var code = this.o.code,
             report_code = this.o.report_code || null,
-            self = this;
+            self = this,
+            r = {
+                domain_code: code,
+                full: true
+            },
+            r = (report_code !== null)? $.extend(true, {}, r, {report_code: report_code}): r;
 
         // initialize selectors
         this.selectors = [];
 
         // retrieve all dimensions
-        API.dimensions({
-            domain_code: code,
-            report_code: report_code,
-            full: true
-        }).then(function(dimensions) {
+        API.dimensions(r).then(function(dimensions) {
 
             amplify.publish(E.LOADING_HIDE, { container: self.$CONTAINER });
 
