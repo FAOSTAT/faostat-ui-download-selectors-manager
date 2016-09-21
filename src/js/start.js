@@ -36,7 +36,7 @@ define([
 
         this.o = $.extend(true, {}, defaultOptions, config);
 
-        log.info('SelectorsManager.init;', this.o);
+        //log.info('SelectorsManager.init;', this.o);
 
         this.initVariables();
         this.initComponents();
@@ -140,7 +140,7 @@ define([
             selections.push(s.getSelections());
         });
 
-        log.info('SelectorsManager.getSelections; ', selections);
+        //log.info('SelectorsManager.getSelections; ', selections);
 
         // validate if one selection is empty
         if ( this.o.validateEmptySelection ) {
